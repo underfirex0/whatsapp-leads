@@ -396,10 +396,9 @@ export function step(input: Conversation, event: EngineInput, ctx: EngineContext
       // At this step the bot asks the quantity next, so only a number actually written is kept.
       if (interp?.quantity !== undefined && interp.quantitySource === 'explicit' && conv.data.quantity === undefined) conv.data.quantity = interp.quantity;
       if (interp?.location && !conv.data.location) conv.data.location = interp.location;
-      // Keep the customer's own words when the lexicon recognised only part of them.
-      if (interp?.product && normalize(text) !== normalize(interp.product) && text.length > 12) {
-        conv.data.details = conv.data.details ?? text;
-      }
+      // Keep a useful clause the lexicon does not model ("pour mon bureau", "avec installation"…).
+      const extra = extractDetails(text);
+      if (extra && conv.data.details === undefined) conv.data.details = extra;
       advanceQualification();
       return result(true);
     }
@@ -494,6 +493,15 @@ function prefill(conv: Conversation, interp: Interpretation, text: string) {
   if (interp.location) conv.data.location = interp.location;
   if (interp.callbackTime) conv.data.callbackTime = interp.callbackTime;
   if (interp.intent === 'INFO' && text.length > 15) conv.data.question = text;
+}
+
+/** "Je cherche un climatiseur pour mon bureau, livraison rapide" → "Pour mon bureau, livraison rapide". */
+export function extractDetails(text: string): string | null {
+  const m = /\b(pour|avec|sans|livr\w*|install\w*|urgent|avant|d[eè]s que|budget|marque|garantie)\b[\s\S]*$/i.exec(text);
+  if (!m) return null;
+  const clause = m[0].replace(/[.!?\s]+$/, '').trim();
+  if (clause.length < 6) return null;
+  return capitalize(clause.slice(0, 200));
 }
 
 function capitalize(s: string) {

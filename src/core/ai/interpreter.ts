@@ -95,6 +95,13 @@ const CALLBACK_PATTERNS: { time: CallbackTime; re: RegExp }[] = [
   { time: 'TODAY', re: /aujourd'?hui|ce soir|cet apres|lyoum|اليوم/ },
 ];
 
+/** Technical units stay upper-case (BTU, kVA…), everyday ones lower-case (litres, pouces). */
+function formatUnit(raw: string): string {
+  const u = raw.toLowerCase();
+  const map: Record<string, string> = { btu: 'BTU', kwc: 'kWc', kw: 'kW', kva: 'kVA', w: 'W', watt: 'W', watts: 'W', cv: 'CV', ah: 'Ah', v: 'V', m2: 'm²', 'm²': 'm²', m3: 'm³', '"': 'pouces', go: 'Go', to: 'To', l: 'litres', litre: 'litres' };
+  return map[u] ?? u;
+}
+
 function parseQuantity(n: string, productHit: boolean): { value: number; source: 'explicit' | 'article' } | undefined {
   const v = parseQuantityValue(n);
   if (v !== undefined) return { value: v, source: 'explicit' };
@@ -153,8 +160,7 @@ export class RuleBasedInterpreter implements Interpreter {
     const spec = SPEC_RE.exec(text);
     if (spec) {
       const value = spec[1].replace(/[\s.,]/g, '');
-      const unit = spec[2].toUpperCase() === '"' ? 'pouces' : spec[2].toUpperCase().replace('M²', 'm²');
-      raw.specification = `${value} ${unit}`.replace(/ M2$/, ' m²');
+      raw.specification = `${value} ${formatUnit(spec[2])}`;
       hits++;
     }
 

@@ -35,9 +35,9 @@ describe('Customer journey', () => {
     expect(conv.data.product).toBe('Climatiseur');
     expect(conv.data.specification).toBe('18000 BTU');
     expect(conv.state).toBe('PRICE_QUANTITY');
+    expect(conv.data.details).toBe('Pour mon bureau');
     await c.say('2');
     await c.press('loc:fiche');
-    await c.say('Pour un bureau');
     conv = (await c.conversation())!;
     expect(conv.state).toBe('COMPLETED');
 
@@ -51,6 +51,7 @@ describe('Customer journey', () => {
       specification: '18000 BTU',
       quantity: 2,
       city: 'Casablanca',
+      details: 'Pour mon bureau',
       consent: true,
       source: 'Telecontact',
       status: 'NEW',

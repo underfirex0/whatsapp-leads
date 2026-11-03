@@ -261,8 +261,9 @@ export async function generateSeed(now: Date, opts: SeedOptions = {}): Promise<D
       }
       const demand = await repo.getDemand(demandId);
       if (demand?.status === 'ACCEPTED' && t0 < now.getTime() - 7 * DAY && chance(0.6)) {
-        clock.advance(2 * DAY);
-        if (clock.now().getTime() < lastSafe) await app.setDemandStatus(demandId, 'CLOSED', 'Traitée', 'Sara (Telecontact)');
+        schedule(clock.now().getTime() + 2 * DAY, async () => {
+          if (clock.now().getTime() < lastSafe) await app.setDemandStatus(demandId, 'CLOSED', 'Traitée', 'Sara (Telecontact)');
+        });
       }
     });
   };

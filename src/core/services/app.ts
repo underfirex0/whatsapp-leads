@@ -475,6 +475,19 @@ export class AppService {
     return count;
   }
 
+  /**
+   * Demo tool: pretend the customer has been silent for `minutes`, then run
+   * the abandonment sweep. Never used by production code paths.
+   */
+  async simulateInactivity(conversationId: string, minutes: number) {
+    const conv = await this.requireConversation(conversationId);
+    const past = new Date(this.deps.clock.now().getTime() - minutes * MINUTE).toISOString();
+    await this.deps.repo.saveConversation({ ...conv, lastInboundAt: past });
+    await this.sweepAbandoned();
+    await this.log({ entity: 'conversation', entityId: conv.id, conversationId: conv.id, action: 'simulated_inactivity', label: `Inactivité simulée (${minutes} min)`, actor: 'démo' });
+    return this.requireConversation(conversationId);
+  }
+
   // ═════════════════════════════ Demands ═════════════════════════════
 
   private async createDemandFromConversation(conv: Conversation): Promise<Demand> {

@@ -194,7 +194,7 @@ describe('Interpreter', () => {
   it('reads quantities and Arabic', () => {
     expect(ai.interpretSync('2 climatiseurs split 12000 BTU').quantity).toBe(2);
     expect(ai.interpretSync('بشحال مكيف في الدار البيضاء')).toMatchObject({ intent: 'PRICE', product: 'Climatiseur', location: 'Casablanca', lang: 'ar' });
-    expect(ai.interpretSync('Panneaux solaires 5 kWc à Rabat')).toMatchObject({ product: 'Panneaux solaires', specification: '5 KWC', location: 'Rabat' });
+    expect(ai.interpretSync('Panneaux solaires 5 kWc à Rabat')).toMatchObject({ product: 'Panneaux solaires', specification: '5 kWc', location: 'Rabat' });
   });
   it('validator rejects malformed AI output', () => {
     const v = validateInterpretation({ intent: 'DROP TABLE', quantity: -4, location: 'Atlantis', product: 42, confidence: 9 }, 'llm');
